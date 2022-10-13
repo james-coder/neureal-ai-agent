@@ -35,7 +35,7 @@ dev() {
         -v "$PWD"/tf-data-models-local:/root/tf-data-models-local \
         -v "$PWD"/tf-data-models:/root/tf-data-models \
         -v "$PWD"/..:/outerdir \
-	-p 6006:6006 \
+	    -p 6006:6006 \
         -it "$CWD" "$@"
 }
 

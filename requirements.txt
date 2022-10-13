@@ -1,18 +1,24 @@
+####pip install -U gym[atari,box2d,classic_control,toy_text,other]==0.23.1
+####ale-import-roms C:\Users\Wil\Desktop\GoogleDrive\_personal\dev_ai\atari_roms\
+
+#mt5linux @ git+https://github.com/lucas-campagna/mt5linux.git    #can't be installed directly yet. requirements.txt bug in their repo.
+MetaTrader5 #Windows only
+
 Box2D==2.3.10
-TA-Lib==0.4.25
 build==0.8.0
 gym==0.23.1  # Do not increase past 0.23.1 until this is live: https://github.com/bulletphysics/bullet3/pull/4335
 gym-algorithmic==0.0.1
 keyboard==0.13.5
 matplotlib==3.6.0
-mt5linux @ git+https://github.com/lucas-campagna/mt5linux.git    #can't be installed directly yet. requirements.txt bug in their repo.
 neureal-ai-util @ git+https://github.com/neureal/neureal-ai-util.git
 numba==0.56.2
 pandas==1.5.0
+pettingzoo==1.22.0
 procgen==0.10.7
 pybullet==3.2.5
 pygame==2.1.2
 pyglet==1.5.27
+pymonk==6.2.1
 pyzmq==24.0.1
 tensorflow-gpu==2.9.2 # Waiting for https://github.com/tensorflow/tensorflow/pull/56691 to be merged fully (cuBLAS error)
 tensorflow_addons==0.17.0

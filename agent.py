@@ -10,10 +10,9 @@ import matplotlib.pyplot as plt
 import gym
 
 import gym_util
-import model_util as util
+import model_nets as nets  # must be imported after the above tf config
 import envs_local.async_wrapper as envaw_
 import envs_local.reconfig_wrapper as envrw_
-import model_nets as nets  # must be imported after the above tf config
 
 np.set_printoptions(precision=8, suppress=True, linewidth=400, threshold=100)
 tf.keras.backend.set_floatx('float64')
@@ -21,10 +20,11 @@ tf.keras.backend.set_floatx('float64')
 tf.keras.backend.set_epsilon(tf.experimental.numpy.finfo(tf.keras.backend.floatx()).eps) # 1e-7 default
 # CUDA 11.8.0, CUDNN 8.6.0.163, tensorflow-gpu==2.9.2, tensorflow_probability==0.17.0
 
-gpus = tf.config.list_physical_devices('GPU')
-for gpu in gpus:
-    tf.config.experimental.set_memory_growth(gpu, True)
+# gpus = tf.config.list_physical_devices('GPU')
+# for gpu in gpus:
+#     tf.config.experimental.set_memory_growth(gpu, True)
 
+import model_util as util
 
 
 def main():
@@ -34,28 +34,26 @@ def main():
     np.random.seed(fix_seed)
     tf.random.set_seed(fix_seed)
 
-    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'  # Filter out info initialization logs
+    machine = socket.gethostname()
+    extra = ''
+    net_attn = {'net':True, 'io':True, 'out':True, 'ar':True}
+    learn_rates = {'action':4e-6} # Policy Gradient agent, PG loss
+    
     current_time = datetime.now().strftime("%Y%m%d-%H%M%S")
     train_log_dir = 'logs/gradient_tape/' + current_time + '/train'
     test_log_dir = 'logs/gradient_tape/' + current_time + '/test'
     train_summary_writer = tf.summary.create_file_writer(train_log_dir)
     test_summary_writer = tf.summary.create_file_writer(test_log_dir)
-    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '0'  # All logs shown
-
-    machine = socket.gethostname()
-    extra = ''
-    net_attn = {'net':True, 'io':True, 'out':True, 'ar':True}
-    learn_rates = {'action':4e-6} # Policy Gradient agent, PG loss
 
     parser = argparse.ArgumentParser(description='Neureal AI Agent')
     # use GPU for large networks (over 8 total net blocks?) or output data (512 bytes?)
-    parser.add_argument('--device_type', type=str, default='CPU', help='device type options: [CPU, GPU]')
+    parser.add_argument('--device_type', type=str, default='GPU', help='device type options: [CPU, GPU]')
     parser.add_argument('--device_id', type=int, default=0, help='GPU device id')
     parser.add_argument('--gym_make', type=str, default='CartPole-v0', help='OpenAI gym environment: [CartPole-v0, CartPole-v1, LunarLander-v2]')
     parser.add_argument('--load_model', type=bool, default=False, help='load trained model')
     parser.add_argument('--save_model', type=bool, default=False, help='save model after training')
     parser.add_argument('--chkpts', type=int, default=5000, help='number of checkpoints')
-    parser.add_argument('--max_episodes', type=int, default=100, help='max episodes')
+    parser.add_argument('--max_episodes', type=int, default=300, help='max episodes')
     parser.add_argument('--latent_size', type=int, default=16, help='latent size')
     parser.add_argument('--latent_dist', type=str, default='d', help="'d' = deterministic, 'c' = categorical, 'mx' = continuous(mixture)")
     parser.add_argument('--mixture_multi', type=int, default=4, help='mixture distribution size,multiply num components')
@@ -180,10 +178,6 @@ def main():
                 if metric_name.startswith('-'):
                     plt.plot(xrng, metric, alpha=1.0, label=metric_name)
                 else:
-                    print(f"max_episodes: {max_episodes}")
-                    print(f"metric: {metric}")
-                    print(f"metric_name: {metric_name}")
-                    print(f"xrng: {xrng}")
                     plt.plot(xrng, util.ewma(metric, window=max_episodes//10+2), alpha=1.0, label=metric_name)
                     plt.plot(xrng, metric, alpha=0.3)
                 plt.ylabel('value')
